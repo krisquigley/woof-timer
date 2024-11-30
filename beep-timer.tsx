@@ -37,7 +37,7 @@ const BeepTimer: React.FC = () => {
   }, [])
 
   const startSpeechRecognition = () => {
-    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition()
       recognitionRef.current.continuous = true
@@ -160,7 +160,9 @@ const BeepTimer: React.FC = () => {
 
   const toggleListening = async () => {
     if (!isListening) {
-      startSpeechRecognition()
+      if (window) {
+        startSpeechRecognition()
+      }
       setIsListening(true)
     } else {
       stopSpeechRecognition()
