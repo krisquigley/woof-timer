@@ -76,7 +76,7 @@ const BeepTimer: React.FC = () => {
         clearTimeout(resetTimeoutRef.current)
       }
     }
-  }, [isListening])
+  }, [isListening, window])
 
   const playBeep = useCallback((remainingTime: number) => {
     if (!isAudioInitialized.current) {
