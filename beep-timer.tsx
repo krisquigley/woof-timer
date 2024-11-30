@@ -36,47 +36,51 @@ const BeepTimer: React.FC = () => {
     }
   }, [])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition()
-        recognitionRef.current.continuous = true
-        recognitionRef.current.interimResults = true
-        recognitionRef.current.lang = 'en-GB'
-        
-        recognitionRef.current.onresult = (event: any) => {
-          const last = event.results.length - 1
-          const text = event.results[last][0].transcript.trim().toUpperCase()
-          setLastWord(text)
-          console.log(text)
-          if (text.includes('HOT POTATO')) {
-            startTimer()
-          }
-        }
+  const startSpeechRecognition = () => {
+    const SpeechRecognition = window.SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = true
+      recognitionRef.current.interimResults = true
+      recognitionRef.current.lang = 'en-GB'
 
-        recognitionRef.current.onerror = (event: any) => {
-          console.error('Speech recognition error:', event.error)
-          setIsListening(false)
-        }
-
-        recognitionRef.current.onend = () => {
-          if (isListening) {
-            recognitionRef.current.start()
-          }
+      recognitionRef.current.onresult = (event: any) => {
+        const last = event.results.length - 1
+        const text = event.results[last][0].transcript.trim().toUpperCase()
+        setLastWord(text)
+        if (text.includes('HOT POTATO')) {
+          startTimer()
         }
       }
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error)
+      }
+
+      recognitionRef.current.onend = () => {
+        if (isListening) {
+          recognitionRef.current.start()
+        }
+      }
+
+      recognitionRef.current.start()
     }
+  }
 
+  const stopSpeechRecognition = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+    }
+  }
+
+  useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop()
-      }
+      stopSpeechRecognition()
       if (resetTimeoutRef.current) {
         clearTimeout(resetTimeoutRef.current)
       }
     }
-  }, [isListening, window])
+  }, [])
 
   const playBeep = useCallback((remainingTime: number) => {
     if (!isAudioInitialized.current) {
@@ -154,12 +158,12 @@ const BeepTimer: React.FC = () => {
     setIsActive(true)
   }
 
-  const toggleListening = () => {
+  const toggleListening = async () => {
     if (!isListening) {
-      recognitionRef.current?.start()
+      startSpeechRecognition()
       setIsListening(true)
     } else {
-      recognitionRef.current?.stop()
+      stopSpeechRecognition()
       setIsListening(false)
     }
   }
