@@ -48,7 +48,7 @@ const BeepTimer: React.FC = () => {
         const last = event.results.length - 1
         const text = event.results[last][0].transcript.trim().toUpperCase()
         setLastWord(text)
-        if (text.includes('HOT POTATO')) {
+        if (text.includes('POTATO')) {
           startTimer()
         }
       }
